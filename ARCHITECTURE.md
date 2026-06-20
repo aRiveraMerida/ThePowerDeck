@@ -28,7 +28,7 @@ y al logo.
 - *Por qué:* requisito del proyecto. Despliegue trivial, nada que mantener en servidor, y el trabajo
   del usuario no sale de su navegador.
 
-### 2.3 Un único `index.html` autónomo
+### 2.3 Un único `dist/index.html` autónomo
 Todo —CSS, JS, el motor del deck, los 52 tipos, la lógica de edición— va embebido en un solo archivo.
 - *Por qué:* portabilidad máxima. El deck exportado es también un archivo único que el cliente abre
   sin instalar nada.
@@ -43,7 +43,7 @@ marcadores de runtime y produce el deck final.
 
 ### 2.5 Fuentes separadas en `src/` + `build.mjs`
 El proyecto se edita por piezas en `src/`; `build.mjs` (Node, sin dependencias) las funde en
-`index.html`. Antes era un monolito sincronizado a mano y un bug podía tardar en aflorar.
+`dist/index.html`. Antes era un monolito sincronizado a mano y un bug podía tardar en aflorar.
 - *Por qué Node:* para que **Vercel ejecute el build de forma nativa** en cada push, sin Python ni
   toolchain extra. (Los tests sí son Python; ver 2.8.)
 
@@ -118,7 +118,7 @@ src/icons.txt    ──(sustituye __ICONS__)──►  registry.js
 src/registry.js  ┐
 src/app.js       ┴─────────────────────────────┐
                                                 ▼
-src/shell.html  (marcador __APP_JS__)  ◄── TPL + registry + app  ──►  index.html
+src/shell.html  (marcador __APP_JS__)  ◄── TPL + registry + app  ──►  dist/index.html
 ```
 
 **Dos clases de marcador, no confundir:**
@@ -144,12 +144,12 @@ renderiza. En Vercel, un build que falla es un deploy que no ocurre.
 
 ```bash
 # 1. construir el artefacto y validar el catálogo (build + smoke, todo Node)
-npm run build            # node build.mjs && node tests/smoke.mjs  →  genera index.html
+npm run build            # node build.mjs && node tests/smoke.mjs  →  genera dist/index.html
 
 # 2. abrirlo
-#    opción A: abrir index.html directamente en el navegador
+#    opción A: abrir dist/index.html directamente en el navegador
 #    opción B (recomendada, simula Vercel): servirlo por HTTP
-python3 -m http.server 8000      # → http://localhost:8000   (cualquier servidor estático vale)
+cd dist && python3 -m http.server 8000   # → http://localhost:8000  (cualquier servidor estático vale)
 
 # 3. validación profunda con navegador (local, antes de desplegar)
 npm run test:e2e         # Playwright: funcional + regresión visual con baseline
@@ -158,14 +158,15 @@ npm run test:e2e         # Playwright: funcional + regresión visual con baselin
 
 ### Iterar
 Editar en `src/` (un tipo → `registry.js`; el motor → `template.html`; la UI → `app.js`), volver a
-`npm run build` y revisar. **Nunca editar `index.html` a mano**: es un artefacto generado.
+`npm run build` y revisar. **Nunca editar `dist/index.html` a mano**: es un artefacto generado.
 
 ### Desplegar en Vercel
 Push del repo a GitHub → importar en Vercel → preset **Other**. La configuración ya está en
 `vercel.json`: `installCommand: npm install --omit=dev` (no instala Playwright, así el build es
-ligero y no descarga navegadores), `buildCommand: npm run build` (regenera `index.html` **y** corre
-el smoke), `outputDirectory: "."`. En cada push Vercel reconstruye desde `src/` y, si el smoke falla,
-**el deploy no ocurre**. No hay nada corriendo en el servidor.
+ligero y no descarga navegadores), `buildCommand: npm run build` (regenera `dist/index.html` **y** corre
+el smoke), `outputDirectory: "dist"` (sirve **solo** el artefacto; `src/` y `tests/` no se exponen).
+En cada push Vercel reconstruye desde `src/` y, si el smoke falla, **el deploy no ocurre**. No hay
+nada corriendo en el servidor.
 
 ---
 

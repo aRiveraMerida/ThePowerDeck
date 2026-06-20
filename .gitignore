@@ -1,6 +1,10 @@
 # Dependencias
 node_modules/
 
+# Artefacto de build (lo regenera build.mjs / Vercel)
+dist/
+index.html
+
 # Artefactos de test (Playwright)
 test-results/
 playwright-report/

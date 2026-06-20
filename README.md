@@ -5,7 +5,8 @@ Eliges el tipo de slide, rellenas el contenido, ves el preview real y exportas e
 completo navegable o slides sueltas. Sin build, sin dependencias.
 
 ## Uso local
-Abre `index.html` en el navegador. Ya funciona.
+Ejecuta `npm run build` y abre `dist/index.html` en el navegador.
+(`dist/` es un artefacto generado; no está versionado.)
 
 - **Izquierda · Añadir slide**: 52 tipos en 5 grupos (Estructura · Contenido · Datos ·
   Diagramas · Media). Click = añadir.
@@ -108,28 +109,28 @@ Aplica a las 52 — multiplica las composiciones sin crear tipos nuevos:
 
 ## Desplegar en Vercel
 
-El runtime es **100% navegador**: no hay backend, ni serverless, ni `api/`. Vercel solo construye
-el `index.html` (build step, en Node) y lo sirve como estático. Las únicas peticiones externas en
+El runtime es **100% navegador**: no hay backend, ni serverless, ni `api/`. Vercel construye
+`dist/index.html` (build step, en Node) y sirve **solo** la carpeta `dist/` como estático, de modo
+que `src/` y `tests/` no quedan expuestos en la URL pública. Las únicas peticiones externas en
 runtime son a CDN (las librerías de export PPTX, solo al exportar) y al logo.
 
-La configuración ya está en `vercel.json` (`buildCommand: node build.mjs`, `outputDirectory: "."`)
+La configuración ya está en `vercel.json` (`buildCommand: npm run build`, `outputDirectory: "dist"`)
 y `package.json` (`npm run build`). Caminos:
 
 **Git (recomendado)**: sube la carpeta a GitHub → impórtala en Vercel → Framework preset **Other**.
-En cada push, Vercel ejecuta `node build.mjs` (regenera `index.html` desde `src/`) y despliega.
-No necesitas commitear el `index.html` a mano.
+En cada push, Vercel ejecuta `npm run build` (regenera `dist/index.html` desde `src/`) y despliega
+solo `dist/`. El artefacto no se versiona.
 
-**CLI**: `npm i -g vercel && cd deck-builder && vercel --prod`.
+**CLI**: `npm i -g vercel && cd ThePowerDeck && vercel --prod`.
 
-**Drag & drop**: como `index.html` ya viene construido en el repo, también puedes arrastrar la
-carpeta a vercel.com sin más.
+**Drag & drop**: ejecuta `npm run build` en local y arrastra la carpeta `dist/` a vercel.com.
 
 No hay nada que correr en el servidor: el despliegue es un archivo estático servido por CDN.
 
 ## Extender: añadir un tipo nuevo
 
-El catálogo vive en el objeto `TYPES`, en **`src/registry.js`** (no edites `index.html`: es un
-artefacto generado). Tras editar, ejecuta `node build.mjs` (o `npm run build`) para regenerar el `index.html`.
+El catálogo vive en el objeto `TYPES`, en **`src/registry.js`** (no edites `dist/index.html`: es un
+artefacto generado). Tras editar, ejecuta `node build.mjs` (o `npm run build`) para regenerar `dist/index.html`.
 
 ```js
 miTipo:{
@@ -148,12 +149,12 @@ Tipos de campo (`t`): `text` · `area` · `list` · `items` (objetos repetibles 
 ## Desarrollo
 
 El proyecto se edita por **fuentes separadas** en `src/` y se ensambla en un único
-`index.html` desplegable con `build.mjs`. No se edita `index.html` a mano: es un artefacto.
+`dist/index.html` desplegable con `build.mjs`. No se edita el artefacto a mano.
 
 ```
-deck-builder/
-├── index.html        ← GENERADO por build.mjs (lo que se despliega)
-├── build.mjs         ← ensambla src/ → index.html (Node, sin dependencias; lo corre Vercel)
+ThePowerDeck/
+├── dist/index.html   ← GENERADO por build.mjs (lo que se despliega; no versionado)
+├── build.mjs         ← ensambla src/ → dist/index.html (Node, sin dependencias; lo corre Vercel)
 ├── package.json      ← scripts: build (build+smoke), test, test:e2e, test:visual:update
 ├── playwright.config.mjs
 ├── vercel.json
@@ -179,7 +180,7 @@ referencia: detecta cambios de layout, color y tipografía, no solo "está vací
 
 ```bash
 # 1. editar lo que toque en src/  (un tipo → registry.js; el motor → template.html; la UI → app.js)
-npm run build               # 2. regenera index.html y valida el catálogo (build + smoke)
+npm run build               # 2. regenera dist/index.html y valida el catálogo (build + smoke)
 npm run test:e2e            # 3. funcional + regresión visual con navegador
 ```
 
@@ -250,5 +251,5 @@ cliente recibe el archivo**. Lo importante es que el archivo descargado viaje co
   estructura comercial real (portada → diagnóstico → programa → precio → cierre).
 - [ ] **Persistir el historial de undo/redo** entre recargas (hoy se pierde al refrescar).
 - [ ] **Notas de orador / modo presentador** en el deck exportado.
-- [ ] **Servir solo el artefacto en Vercel.** `outputDirectory: "."` expone también `src/` y `tests/`
-  en la URL pública (inocuo, es código cliente). Emitir a `dist/` si se prefiere un deploy limpio.
+- [x] **Servir solo el artefacto en Vercel.** `build.mjs` emite a `dist/` y `outputDirectory: "dist"`,
+  de modo que `src/` y `tests/` ya no quedan expuestos en la URL pública.

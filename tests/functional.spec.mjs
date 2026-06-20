@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const INDEX = pathToFileURL(join(ROOT, "index.html")).href;
+const INDEX = pathToFileURL(join(ROOT, "dist", "index.html")).href;
 
 test("carga sin errores y con los 52 tipos", async ({ page }) => {
   const errs = [];

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * build.mjs — ensambla las fuentes de src/ en un único index.html desplegable.
+ * build.mjs — ensambla las fuentes de src/ en un único dist/index.html desplegable.
  *
  * Sin dependencias (solo módulos nativos de Node). Lo ejecuta Vercel en el build step
  * y también sirve en local. El resultado es un único archivo estático que corre
@@ -15,7 +15,7 @@
  *
  * Uso:  node build.mjs       (o `npm run build`)
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -48,7 +48,9 @@ if (nScript !== 1) {
   process.exit(1);
 }
 
-writeFileSync(join(ROOT, "index.html"), out);
+const DIST = join(ROOT, "dist");
+mkdirSync(DIST, { recursive: true });
+writeFileSync(join(DIST, "index.html"), out);
 console.log(
-  `\u2713 index.html generado \u00b7 ${out.length.toLocaleString("es")} bytes \u00b7 1 </script> \u00b7 sin marcadores`
+  `\u2713 dist/index.html generado \u00b7 ${out.length.toLocaleString("es")} bytes \u00b7 1 </script> \u00b7 sin marcadores`
 );
