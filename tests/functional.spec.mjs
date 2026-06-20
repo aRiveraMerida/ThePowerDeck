@@ -7,14 +7,14 @@ import { dirname, join } from "node:path";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const INDEX = pathToFileURL(join(ROOT, "dist", "index.html")).href;
 
-test("carga sin errores y con los 52 tipos", async ({ page }) => {
+test("carga sin errores y con los 64 tipos", async ({ page }) => {
   const errs = [];
   page.on("pageerror", (e) => errs.push(String(e)));
   page.on("console", (m) => { if (m.type() === "error") errs.push("console: " + m.text()); });
   await page.goto(INDEX);
   await page.waitForTimeout(500);
   const n = await page.evaluate(() => Object.keys(TYPES).length);
-  expect(n).toBeGreaterThanOrEqual(50);
+  expect(n).toBeGreaterThanOrEqual(64);
   expect(errs).toEqual([]);
 });
 

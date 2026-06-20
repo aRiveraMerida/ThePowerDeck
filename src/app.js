@@ -181,7 +181,9 @@ const TG={cover:'cover',statement:'statement',divider:'divider',agenda:'agenda',
  cards:'cards',icongrid:'icongrid',twocol:'twocol',steps:'steps',layers:'layers',qlist:'qlist',feat:'list',callout:'callout',hlbox:'callout',bento:'bento',profile:'profile',proscons:'proscons',checklist:'checklist',logos:'logos',
  statrow:'statrow',kpi:'kpi',table:'table',compare:'compare',shift:'shift',seq:'seq',flow:'flow',bignum:'bignum',barchart:'bars',fmatrix:'fmatrix',pricing:'pricing',progress:'progress',linechart:'line',
  pyramid:'pyramid',donut:'donut',gauge:'gauge',hbar:'hbars',timeline:'timeline',funnel:'funnel',stack:'stack',venn:'venn',matrix:'matrix',cycle:'cycle',vtimeline:'vtimeline',
- imagefull:'image',imagesplit:'imagesplit',video:'video',gallery:'gallery',threecol:'threecol',splitstat:'splitstat',banner:'banner'};
+ imagefull:'image',imagesplit:'imagesplit',video:'video',gallery:'gallery',threecol:'threecol',splitstat:'splitstat',banner:'banner',
+ stackbar:'bars',areachart:'line',waterfall:'bars',orgchart:'flow',swimlane:'table',gantt:'hbars',
+ coverimg:'image',agendaprog:'agenda',thanks:'cta',device:'imagesplit',compareimg:'gallery',statimg:'image'};
 function thumb(id){const g=GLYPH[TG[id]||'list']||GLYPH.list;return `<svg viewBox="0 0 100 36" class="thmb" preserveAspectRatio="xMidYMid meet">${g}</svg>`;}
 
 /* ===== galería (colapsable + buscador) ===== */

@@ -330,6 +330,108 @@ splitstat:{label:'Dato + cuerpo',group:'Datos',desc:'Cifra grande junto a lista'
 banner:{label:'Capítulo / banda',group:'Estructura',desc:'Transición con número de fase',
  fields:[{k:'kicker',l:'Etiqueta (fase)',t:'text'},{k:'title',l:'Título',t:'area',hint:'<span class="acc">…</span>'},{k:'desc',l:'Descripción',t:'area'},{k:'wm',l:'Watermark',t:'text'}],
  sample:{kicker:'Fase 02 · Despliegue',title:'Ahora lo llevamos <span class="acc">a producción</span>.',desc:'De la formación al uso real, con casos de cada área.',wm:''},
- render:d=>`<section class="scene"${d.wm?` data-wm="${esc(d.wm)}"`:''}><div class="banner"><div class="bnk reveal">${esc(d.kicker)}</div><div class="bnt reveal">${esc(d.title)}</div>${d.desc?`<div class="bnd reveal">${esc(d.desc)}</div>`:''}</div></section>`}
+ render:d=>`<section class="scene"${d.wm?` data-wm="${esc(d.wm)}"`:''}><div class="banner"><div class="bnk reveal">${esc(d.kicker)}</div><div class="bnt reveal">${esc(d.title)}</div>${d.desc?`<div class="bnd reveal">${esc(d.desc)}</div>`:''}</div></section>`},
+
+/* ---------- VARIANTES EXTRA (v8) ---------- */
+
+/* ----- Datos: gráficos avanzados ----- */
+stackbar:{label:'Barras apiladas',group:'Datos',desc:'Composición por columna (100%)',
+ fields:[{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},{k:'source',l:'Fuente',t:'text'},
+   {k:'legend',l:'Series (una/línea, máx 3)',t:'list'},
+   {k:'items',l:'Columnas',t:'items',sub:[{k:'lbl',l:'Etiqueta',t:'text'},{k:'a',l:'Serie 1',t:'range'},{k:'b',l:'Serie 2',t:'range'},{k:'c',l:'Serie 3',t:'range'}]}],
+ sample:{eyebrow:'Composición',num:'07',title:'Cómo se reparte el trabajo de análisis',source:'',legend:['Manual','Asistido por IA','Automático'],items:[{lbl:'Q1',a:'60',b:'30',c:'10'},{lbl:'Q2',a:'45',b:'40',c:'15'},{lbl:'Q3',a:'30',b:'45',c:'25'},{lbl:'Q4',a:'18',b:'47',c:'35'}]},
+ render:d=>{const seg=['sa','sb','sc'];const leg=(d.legend||[]).slice(0,3);
+   const cols=(d.items||[]).map(it=>{const v=[parseFloat(it.a)||0,parseFloat(it.b)||0,parseFloat(it.c)||0];const tot=v.reduce((x,y)=>x+y,0)||1;
+     const segs=v.map((x,i)=>x>0?`<div class="sseg ${seg[i]}" style="height:${(x/tot*100).toFixed(1)}%">${x/tot>=.12?`<span>${Math.round(x/tot*100)}%</span>`:''}</div>`:'').join('');
+     return `<div class="scolw"><div class="scol">${segs}</div><div class="slbl">${esc(it.lbl)}</div></div>`}).join('');
+   const legend=leg.length?`<div class="slegend reveal">${leg.map((l,i)=>`<span class="sli"><i class="${seg[i]}"></i>${esc(l)}</span>`).join('')}</div>`:'';
+   return `<section class="scene"><div class="eyebrow reveal">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title reveal" style="font-size:5cqh">${esc(d.title)}</h2><div class="stackbar reveal">${cols}</div>${legend}${d.source?`<div class="source">${esc(d.source)}</div>`:''}</section>`}},
+
+areachart:{label:'Gráfico de área',group:'Datos',desc:'Tendencia con relleno',
+ fields:[{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},{k:'source',l:'Fuente',t:'text'},
+   {k:'items',l:'Puntos',t:'items',sub:[{k:'y',l:'Valor',t:'range'},{k:'lbl',l:'Etiqueta X',t:'text'}]}],
+ sample:{eyebrow:'Evolución',num:'08',title:'Horas ahorradas por semana',source:'',items:[{y:'12',lbl:'Ene'},{y:'24',lbl:'Feb'},{y:'33',lbl:'Mar'},{y:'48',lbl:'Abr'},{y:'61',lbl:'May'},{y:'74',lbl:'Jun'}]},
+ render:d=>{const its=d.items||[];const pts=its.map(it=>parseFloat(it.y)||0);const n=pts.length;
+   const W=100,H=40,pl=11,pr=3,pt=4,pb=8;const max=niceMax(Math.max(...pts,1));
+   const X=i=>pl+(W-pl-pr)*(n>1?i/(n-1):0);const Y=v=>pt+(H-pt-pb)*(1-v/max);
+   const grid=[0,.5,1].map(f=>{const tv=f*max,y=Y(tv).toFixed(1);return `<line class="lc-grid" x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}"/><text class="lc-axis" x="${pl-1.5}" y="${(+y+1).toFixed(1)}">${fmtNum(tv)}</text>`}).join('');
+   const line=pts.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+   const area=`${X(0).toFixed(1)},${(H-pb).toFixed(1)} ${line} ${X(n-1).toFixed(1)},${(H-pb).toFixed(1)}`;
+   const dots=pts.map((v,i)=>`<circle class="lc-dot" cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="1"/><text class="lc-val" x="${X(i).toFixed(1)}" y="${(Y(v)-2.4).toFixed(1)}">${esc(its[i].y)}</text><text class="lc-lbl" x="${X(i).toFixed(1)}" y="${H-1}">${esc(its[i].lbl)}</text>`).join('');
+   return `<section class="scene"><div class="eyebrow reveal">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title reveal" style="font-size:5cqh">${esc(d.title)}</h2><div class="linechart reveal"><svg viewBox="0 0 ${W} ${H}" class="drawin"><polygon class="lc-area" points="${area}"/>${grid}<polyline class="lc-line" points="${line}"/>${dots}</svg></div>${d.source?`<div class="source">${esc(d.source)}</div>`:''}</section>`}},
+
+waterfall:{label:'Cascada (waterfall)',group:'Datos',desc:'Aporte acumulado paso a paso',
+ fields:[{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},{k:'source',l:'Fuente',t:'text'},
+   {k:'items',l:'Pasos',t:'items',sub:[{k:'lbl',l:'Etiqueta',t:'text'},{k:'val',l:'Valor (negativo = baja)',t:'text'},{k:'kind',l:'Tipo',t:'sel',opts:['base','delta','total']}]}],
+ sample:{eyebrow:'De dónde sale',num:'09',title:'Productividad ganada (índice)',source:'',items:[{lbl:'Punto de partida',val:'40',kind:'base'},{lbl:'Asistente IA',val:'25',kind:'delta'},{lbl:'Procesos',val:'15',kind:'delta'},{lbl:'Curva de aprendizaje',val:'-12',kind:'delta'},{lbl:'Resultado',val:'',kind:'total'}]},
+ render:d=>{const its=d.items||[];let run=0;const rows=[];let peak=1;
+   its.forEach(it=>{const v=parseFloat(it.val)||0;let lo,hi;
+     if(it.kind==='base'){lo=0;hi=v;run=v;}
+     else if(it.kind==='total'){lo=0;hi=(it.val!==''&&!isNaN(parseFloat(it.val)))?parseFloat(it.val):run;}
+     else{lo=run;hi=run+v;run=hi;}
+     peak=Math.max(peak,lo,hi);rows.push({it,v,lo,hi});});
+   const max=niceMax(peak);
+   const bars=rows.map(r=>{const bottom=Math.min(r.lo,r.hi),top=Math.max(r.lo,r.hi);
+     const h=(top-bottom)/max*100,off=bottom/max*100;
+     const cls=r.it.kind==='base'?'wf-base':r.it.kind==='total'?'wf-total':(r.v>=0?'wf-up':'wf-down');
+     const shown=r.it.kind==='delta'?((r.v>=0?'+':'')+esc(r.it.val)):fmtNum(top);
+     return `<div class="wfcol"><div class="wftrack"><div class="wfbar ${cls}" style="height:${h.toFixed(1)}%;bottom:${off.toFixed(1)}%"><span>${shown}</span></div></div><div class="wflbl">${esc(r.it.lbl)}</div></div>`}).join('');
+   return `<section class="scene"><div class="eyebrow reveal">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title reveal" style="font-size:5cqh">${esc(d.title)}</h2><div class="waterfall reveal">${bars}</div>${d.source?`<div class="source">${esc(d.source)}</div>`:''}</section>`}},
+
+/* ----- Diagramas: relaciones ----- */
+orgchart:{label:'Organigrama',group:'Diagramas',desc:'Nodo raíz + ramas',
+ fields:[{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},{k:'topT',l:'Nodo superior',t:'text'},{k:'topD',l:'Subtítulo superior',t:'text'},
+   {k:'items',l:'Ramas',t:'items',sub:[{k:'t',l:'Nombre / área',t:'text'},{k:'d',l:'Detalle',t:'text'}]}],
+ sample:{eyebrow:'Gobierno',num:'07',title:'Quién sostiene la adopción',topT:'Comité de IA',topD:'Patrocinio de Dirección',items:[{t:'Datos',d:'Gobierno y calidad'},{t:'Producto',d:'Casos de uso'},{t:'Personas',d:'Formación y adopción'}]},
+ render:d=>`<section class="scene"><div class="eyebrow reveal">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title reveal" style="font-size:4.8cqh">${esc(d.title)}</h2><div class="orgchart reveal"><div class="orgtop"><div class="orgt">${esc(d.topT)}</div>${d.topD?`<div class="orgd">${esc(d.topD)}</div>`:''}</div><div class="orgline"></div><div class="orgrow">${(d.items||[]).map(it=>`<div class="orgnode"><div class="orgt">${esc(it.t)}</div>${it.d?`<div class="orgd">${esc(it.d)}</div>`:''}</div>`).join('')}</div></div></section>`},
+
+swimlane:{label:'Carriles (swimlane)',group:'Diagramas',desc:'Flujo por responsable',
+ fields:[{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},
+   {k:'items',l:'Carriles',t:'items',sub:[{k:'name',l:'Carril',t:'text'},{k:'steps',l:'Pasos (sep. con |)',t:'text'}]}],
+ sample:{eyebrow:'El flujo',num:'08',title:'Quién hace qué, en orden',items:[{name:'Cliente',steps:'Solicita | Recibe | Aprueba'},{name:'IA',steps:'Analiza | Redacta | Resume'},{name:'Equipo',steps:'Revisa | Publica'}]},
+ render:d=>`<section class="scene"><div class="eyebrow reveal">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title reveal" style="font-size:5cqh">${esc(d.title)}</h2><div class="swimlane reveal">${(d.items||[]).map(it=>`<div class="lane"><div class="lname">${esc(it.name)}</div><div class="lsteps">${(it.steps||'').split('|').map(s=>s.trim()).filter(Boolean).map((s,i)=>`${i?'<span class="larr">→</span>':''}<span class="lstep">${esc(s)}</span>`).join('')}</div></div>`).join('')}</div></section>`},
+
+gantt:{label:'Gantt',group:'Diagramas',desc:'Tareas sobre una línea temporal',
+ fields:[{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},{k:'cols',l:'Periodos (uno/línea)',t:'list'},
+   {k:'items',l:'Tareas',t:'items',sub:[{k:'name',l:'Tarea',t:'text'},{k:'start',l:'Inicio (col nº)',t:'text'},{k:'len',l:'Duración (cols)',t:'text'},{k:'color',l:'Color',t:'swatch',opts:['mint','blue','coral']}]}],
+ sample:{eyebrow:'Plan',num:'09',title:'Calendario del despliegue',cols:['S1','S2','S3','S4','S5','S6'],items:[{name:'Diagnóstico',start:'1',len:'2',color:'mint'},{name:'Formación',start:'2',len:'3',color:'blue'},{name:'Despliegue',start:'4',len:'2',color:'mint'},{name:'Medición',start:'5',len:'2',color:'coral'}]},
+ render:d=>{const cols=(d.cols||[]);const c=cols.length||1;
+   const head=`<div class="grow ghead"><span></span>${cols.map(x=>`<span class="gp">${esc(x)}</span>`).join('')}</div>`;
+   const rows=(d.items||[]).map(it=>{let s=parseInt(it.start)||1,l=parseInt(it.len)||1;s=Math.max(1,Math.min(s,c));l=Math.max(1,Math.min(l,c-s+1));
+     return `<div class="grow"><span class="gname">${esc(it.name)}</span><div class="gbar ${it.color==='mint'?'':esc(it.color)}" style="grid-column:${s+1} / span ${l}"></div></div>`}).join('');
+   return `<section class="scene"><div class="eyebrow reveal">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title reveal" style="font-size:5cqh">${esc(d.title)}</h2><div class="gantt reveal" style="--c:${c}">${head}${rows}</div></section>`}},
+
+/* ----- Estructura: narrativa ----- */
+coverimg:{label:'Portada con imagen',group:'Estructura',desc:'Apertura full-bleed',
+ fields:[{k:'media',l:'Imagen',t:'media',kind:'image'},{k:'anim',l:'Animación',t:'sel',opts:['estática','ken']},{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'meta',l:'Meta (derecha)',t:'text'},{k:'title',l:'Titular',t:'area',hint:'<span class="acc">…</span>'},{k:'sub',l:'Subtítulo',t:'area'},{k:'foot',l:'Pie de marca',t:'text'},{k:'wm',l:'Watermark',t:'text'}],
+ sample:{media:{kind:'image',src:''},anim:'ken',eyebrow:'Propuesta · Cliente',meta:'· Junio 2026',title:'Titular sobre imagen.<br><span class="acc">Una sola idea.</span>',sub:'Subtítulo en una frase corta.',foot:'CLIENTE · 2026',wm:''},
+ render:d=>`<section class="scene bleed"${d.wm?` data-wm="${esc(d.wm)}"`:''}><div class="media-full">${mediaTag(d.media||{kind:'image'},{anim:d.anim==='ken'?'ken':''})}<div class="ov"></div><div class="cap">${(d.eyebrow||d.meta)?`<div class="eyebrow reveal"><span>${esc(d.eyebrow)}</span>${d.meta?`<span class="num">${esc(d.meta)}</span>`:''}</div>`:''}<h1 class="reveal" style="font-size:7.6cqh;margin-top:2.6cqh;max-width:82cqw;line-height:1.04">${esc(d.title)}</h1>${d.sub?`<p class="reveal lead muted" style="margin-top:2.4cqh;max-width:60cqw">${esc(d.sub)}</p>`:''}${d.foot?`<div class="foot reveal"><span class="dot"></span><span class="ft">${esc(d.foot)}</span></div>`:''}</div></div></section>`},
+
+agendaprog:{label:'Índice con progreso',group:'Estructura',desc:'Secciones con estado',
+ fields:[{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},
+   {k:'items',l:'Secciones',t:'items',sub:[{k:'t',l:'Sección',t:'text'},{k:'s',l:'Estado',t:'sel',opts:['hecho','actual','próximo']}]}],
+ sample:{eyebrow:'Dónde estamos',num:'',title:'Recorrido de la sesión',items:[{t:'Contexto',s:'hecho'},{t:'Diagnóstico',s:'hecho'},{t:'Propuesta',s:'actual'},{t:'Modelo económico',s:'próximo'},{t:'Siguientes pasos',s:'próximo'}]},
+ render:d=>`<section class="scene top"><div class="eyebrow reveal">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title reveal" style="font-size:5cqh">${esc(d.title)}</h2><div class="agprog reveal">${(d.items||[]).map((it,i)=>{const s=it.s==='hecho'?'done':it.s==='actual'?'now':'next';const mk=s==='done'?'<svg class="ico"><use href="#i-check"/></svg>':String(i+1).padStart(2,'0');return `<div class="agp ${s}"><div class="agmk">${mk}</div><div class="agt">${esc(it.t)}</div></div>`}).join('')}</div></section>`},
+
+thanks:{label:'Gracias / contacto',group:'Estructura',desc:'Cierre con datos de contacto',
+ fields:[{k:'title',l:'Titular',t:'area',hint:'<span class="acc">…</span>'},{k:'sub',l:'Subtítulo',t:'area'},{k:'contacts',l:'Contactos (uno/línea)',t:'list'},{k:'wm',l:'Watermark',t:'text'}],
+ sample:{title:'<span class="acc">Gracias</span>.',sub:'Hablemos de cómo aplicarlo en vuestro equipo.',contacts:['alberto@thepower.education','thepower.education','@thepower'],wm:'thePower'},
+ render:d=>`<section class="scene center-h"${d.wm?` data-wm="${esc(d.wm)}"`:''}><div class="thanks"><div class="thx reveal">${esc(d.title)}</div>${d.sub?`<div class="thsub reveal">${esc(d.sub)}</div>`:''}${(d.contacts&&d.contacts.length)?`<div class="thc reveal">${d.contacts.map(c=>`<span>${esc(c)}</span>`).join('')}</div>`:''}</div></section>`},
+
+/* ----- Media ----- */
+device:{label:'Mockup de dispositivo',group:'Media',desc:'Captura en marco + texto',
+ fields:[{k:'img',l:'Captura',t:'img'},{k:'kind',l:'Dispositivo',t:'sel',opts:['portátil','móvil']},{k:'side',l:'Dispositivo a la',t:'sel',opts:['derecha','izquierda']},{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},{k:'body',l:'Texto',t:'area'}],
+ sample:{img:'',kind:'portátil',side:'derecha',eyebrow:'El producto',num:'01',title:'Así se ve en uso',body:'La interfaz real que verá el equipo, con el flujo de trabajo integrado.'},
+ render:d=>{const phone=d.kind==='móvil';const dev=`<div class="devwrap reveal"><div class="device ${phone?'phone':'laptop'}"><div class="scr">${imgOr(d.img,'captura')}</div>${phone?'':'<div class="base"></div>'}</div></div>`;const text=`<div class="devtext reveal"><div class="eyebrow">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title" style="font-size:5cqh">${esc(d.title)}</h2><p class="body" style="margin-top:2.4cqh">${esc(d.body)}</p></div>`;return `<section class="scene"><div class="devsplit${d.side==='izquierda'?' rev':''}">${d.side==='izquierda'?dev+text:text+dev}</div></section>`}},
+
+compareimg:{label:'Comparador (antes/después)',group:'Media',desc:'Dos imágenes enfrentadas',
+ fields:[{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'num',l:'Nº',t:'text'},{k:'title',l:'Titular',t:'area'},{k:'imgA',l:'Imagen izquierda',t:'img'},{k:'labA',l:'Etiqueta izquierda',t:'text'},{k:'imgB',l:'Imagen derecha',t:'img'},{k:'labB',l:'Etiqueta derecha',t:'text'}],
+ sample:{eyebrow:'El cambio',num:'02',title:'Antes y después del rediseño',imgA:'',labA:'Antes',imgB:'',labB:'Después'},
+ render:d=>`<section class="scene"><div class="eyebrow reveal">${d.num?`<span class="num">${esc(d.num)}</span>`:''}<span>${esc(d.eyebrow)}</span></div><h2 class="title reveal" style="font-size:5cqh">${esc(d.title)}</h2><div class="cmpimg reveal"><div class="cmp a">${imgOr(d.imgA,'antes')}${d.labA?`<div class="cmplab">${esc(d.labA)}</div>`:''}</div><div class="cmp b">${imgOr(d.imgB,'después')}${d.labB?`<div class="cmplab">${esc(d.labB)}</div>`:''}</div></div></section>`},
+
+statimg:{label:'Dato sobre imagen',group:'Media',desc:'Cifra grande sobre foto',
+ fields:[{k:'media',l:'Imagen',t:'media',kind:'image'},{k:'anim',l:'Animación',t:'sel',opts:['estática','ken']},{k:'eyebrow',l:'Eyebrow',t:'text'},{k:'fig',l:'Cifra (HTML ok)',t:'text'},{k:'label',l:'Texto',t:'area'},{k:'pos',l:'Posición',t:'sel',opts:['abajo','centro']},{k:'wm',l:'Watermark',t:'text'}],
+ sample:{media:{kind:'image',src:''},anim:'ken',eyebrow:'El impacto',fig:'73<small>%</small>',label:'de las tareas de análisis ya pasan por un asistente de IA.',pos:'abajo',wm:''},
+ render:d=>`<section class="scene bleed"${d.wm?` data-wm="${esc(d.wm)}"`:''}><div class="media-full">${mediaTag(d.media||{kind:'image'},{anim:d.anim==='ken'?'ken':''})}<div class="ov"></div><div class="cap${d.pos==='centro'?' mid':''}">${d.eyebrow?`<div class="eyebrow reveal"${d.pos==='centro'?' style="justify-content:center"':''}><span>${esc(d.eyebrow)}</span></div>`:''}<div class="siFig reveal">${esc(d.fig)}</div>${d.label?`<div class="siLbl reveal">${esc(d.label)}</div>`:''}</div></div></section>`}
 };
 const GROUPS=['Estructura','Contenido','Datos','Diagramas','Media'];

@@ -29,7 +29,7 @@ y al logo.
   del usuario no sale de su navegador.
 
 ### 2.3 Un único `dist/index.html` autónomo
-Todo —CSS, JS, el motor del deck, los 52 tipos, la lógica de edición— va embebido en un solo archivo.
+Todo —CSS, JS, el motor del deck, los 64 tipos, la lógica de edición— va embebido en un solo archivo.
 - *Por qué:* portabilidad máxima. El deck exportado es también un archivo único que el cliente abre
   sin instalar nada.
 
@@ -74,13 +74,13 @@ Escapa todo el input y luego restaura una lista blanca de etiquetas de formato s
 ### 2.9 Tests unificados en Node, con autovalidación en el build
 Un único toolchain (Node), el mismo que el build:
 - **`tests/smoke.mjs`** — Node puro, sin dependencias. Evalúa `registry.js` (autónomo: sus render()
-  solo usan `esc`/`ic` y no tocan el DOM) y comprueba que los 52 tipos renderizan y que el saneo
+  solo usan `esc`/`ic` y no tocan el DOM) y comprueba que los 64 tipos renderizan y que el saneo
   funciona, en ~250 ms. **Se ejecuta dentro de `npm run build`**, así que un catálogo roto aborta el
   build y, por tanto, el deploy.
 - **`tests/functional.spec.mjs`** — `@playwright/test`. Carga sin errores, exportación,
   `localStorage` y navegación.
 - **`tests/visual.spec.mjs`** — `@playwright/test` con `toHaveScreenshot`. **Regresión visual con
-  baseline**: compara cada tipo (51; el `video` se excluye por ser un embed externo no determinista)
+  baseline**: compara cada tipo (63; el `video` se excluye por ser un embed externo no determinista)
   contra una captura de referencia local (no versionada; se genera la primera vez). Detecta cambios de layout, color y tipografía, no
   solo presencia. Umbral `maxDiffPixelRatio: 0.002` (validado: deja pasar el ruido sub-pixel pero
   caza un cambio de palabra en un título). Regenerar baseline: `npm run test:visual:update`.

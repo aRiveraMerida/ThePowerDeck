@@ -8,7 +8,7 @@ completo navegable o slides sueltas. Sin build, sin dependencias.
 Ejecuta `npm run build` y abre `dist/index.html` en el navegador.
 (`dist/` es un artefacto generado; no está versionado.)
 
-- **Izquierda · Añadir slide**: 52 tipos en 5 grupos (Estructura · Contenido · Datos ·
+- **Izquierda · Añadir slide**: 64 tipos en 5 grupos (Estructura · Contenido · Datos ·
   Diagramas · Media). Click = añadir.
 - **Centro · Preview 16:9 en vivo**: es el motor real — lo que ves es lo que exportas.
 - **Derecha · Editor**: formulario de la slide. En los títulos puedes usar
@@ -35,7 +35,7 @@ El deck y la marca se autoguardan en el navegador (localStorage).
 ## Variantes y elementos extra (en toda slide)
 
 Cada slide tiene una sección plegable **"Variantes y elementos extra"** al final del editor.
-Aplica a las 52 — multiplica las composiciones sin crear tipos nuevos:
+Aplica a las 64 — multiplica las composiciones sin crear tipos nuevos:
 
 - **Invertir disposición**: voltea las slides de dos columnas (dos columnas, comparativa,
   pros/contras, cita con retrato, dato+cuerpo).
@@ -75,18 +75,18 @@ Aplica a las 52 — multiplica las composiciones sin crear tipos nuevos:
   (`<b>`, `<small>`, `<span class="acc">`) se respeta. Bloquea inyección de scripts en el HTML
   exportado.
 
-## Catálogo de tipos (52)
+## Catálogo de tipos (64)
 
-- **Estructura**: Portada · Frase única · Divisor de sección · Agenda · Cita · Cita con retrato · Cierre / CTA · **Capítulo / banda**
+- **Estructura**: Portada · Frase única · Divisor de sección · Agenda · Cita · Cita con retrato · Cierre / CTA · Capítulo / banda · **Portada con imagen** · **Índice con progreso** · **Gracias / contacto**
 - **Contenido**: Tarjetas · Capacidades (iconos) · Dos columnas · Pasos · Capas · Preguntas ·
   Bullets · Callout · Nota destacada · Rejilla bento · Equipo/personas · Pros y contras ·
-  Checklist · Muro de logos · **Tres columnas**
+  Checklist · Muro de logos · Tres columnas
 - **Datos**: Cifras · KPIs · Tabla · Comparativa antes/ahora · Cambios · Secuencia · Flujo ·
   Número héroe · Barras verticales · Comparativa ✓/✗ · Tarifas/planes · Barras de progreso ·
-  Gráfico de línea · **Dato + cuerpo**
+  Gráfico de línea · Dato + cuerpo · **Barras apiladas** · **Gráfico de área** · **Cascada (waterfall)**
 - **Diagramas**: Pirámide · Donuts · Medidor · Barras · Roadmap (timeline) · Embudo · Stack ·
-  Venn · Matriz 2×2 · Proceso circular · **Cronología vertical**
-- **Media**: Imagen a sangre · Imagen + texto · Vídeo (YouTube/Vimeo/MP4) · **Galería de imágenes**
+  Venn · Matriz 2×2 · Proceso circular · Cronología vertical · **Organigrama** · **Carriles (swimlane)** · **Gantt**
+- **Media**: Imagen a sangre · Imagen + texto · Vídeo (YouTube/Vimeo/MP4) · Galería de imágenes · **Mockup de dispositivo** · **Comparador (antes/después)** · **Dato sobre imagen**
 
 ### Imágenes — subir con optimización
 - **Subir y optimizar**: cualquier imagen se **redimensiona a 1920px y se comprime en WebP**
@@ -161,7 +161,7 @@ ThePowerDeck/
 ├── src/
 │   ├── template.html ← motor del deck (16:9, escalado por container queries, marca, animaciones)
 │   ├── icons.txt     ← IDs de iconos disponibles (se inyectan en el registry)
-│   ├── registry.js   ← los 52 tipos de slide (cada uno: label, group, fields, sample, render)
+│   ├── registry.js   ← los 64 tipos de slide (cada uno: label, group, fields, sample, render)
 │   ├── app.js        ← lógica del builder: estado, edición, historial, marca, export, glyphs
 │   └── shell.html    ← marco HTML de la app (recibe todo lo anterior)
 └── tests/
