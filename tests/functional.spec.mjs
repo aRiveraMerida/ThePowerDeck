@@ -50,6 +50,46 @@ test("localStorage: el deck persiste entre recargas", async ({ page }) => {
   expect(ls).toEqual({ t: "LS", n: 1, a: "#123456" });
 });
 
+test("tema: el color de marca se renderiza por encima del preset (thePower y editorial)", async ({ page }) => {
+  await page.goto(INDEX);
+  await page.evaluate(() => localStorage.removeItem("tp_deck2"));
+  await page.reload();
+  await page.evaluate(() => addSlide("cover"));
+  const accDe = async (th) => {
+    await page.click(`#themeSel button[data-th="${th}"]`);
+    await page.evaluate(() => {
+      const i = document.getElementById("bAcc");
+      i.value = "#ff0000";
+      i.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await page.waitForTimeout(300);
+    return page.evaluate(() => {
+      const root = document.getElementById("preview").contentDocument.documentElement;
+      return getComputedStyle(root).getPropertyValue("--acc").trim().toLowerCase();
+    });
+  };
+  // en ambos temas, el acento elegido en el panel de marca debe ganar al preset del tema
+  expect(await accDe("editorial")).toBe("#ff0000");
+  expect(await accDe("")).toBe("#ff0000");
+});
+
+test("tema: cambiar de tema vuelca su paleta en la marca y se renderiza", async ({ page }) => {
+  await page.goto(INDEX);
+  await page.evaluate(() => localStorage.removeItem("tp_deck2"));
+  await page.reload();
+  await page.evaluate(() => addSlide("cover"));
+  await page.click('#themeSel button[data-th="editorial"]');
+  await page.waitForTimeout(300);
+  const r = await page.evaluate(() => {
+    const root = document.getElementById("preview").contentDocument.documentElement;
+    return { brandAcc: brand.accent.toLowerCase(), pickerAcc: document.getElementById("bAcc").value.toLowerCase(), cssAcc: getComputedStyle(root).getPropertyValue("--acc").trim().toLowerCase() };
+  });
+  // el preset editorial se carga en la marca, el selector lo refleja y el preview lo pinta
+  expect(r.brandAcc).toBe("#c8f04a");
+  expect(r.pickerAcc).toBe("#c8f04a");
+  expect(r.cssAcc).toBe("#c8f04a");
+});
+
 test("navegación del deck exportado (← →)", async ({ page, context }) => {
   await page.goto(INDEX);
   const dh = await page.evaluate(() => {

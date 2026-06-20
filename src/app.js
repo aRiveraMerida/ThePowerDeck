@@ -25,8 +25,11 @@ function load(){try{const r=JSON.parse(localStorage.getItem('tp_deck2'));if(r&&r
 function brandStyle(){
   const f=FONTS[brand.font]||FONTS.grotesk;
   const ink2=shade(brand.ink,.10),ink3=shade(brand.ink,.18),paper2=shade(brand.paper,-.08);
+  // selector con la misma especificidad que html.editorial (0,0,1,1) e inyectado después,
+  // para que la marca del usuario gane SIEMPRE al preset del tema (si no, en editorial los
+  // colores de marca quedaban pisados por html.editorial y no se renderizaban).
   return `<link href="https://fonts.googleapis.com/css2?${f.link}&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<style id="brandvars">:root{
+<style id="brandvars">:root,html.editorial{
  --mint:${brand.accent};--acc:${brand.accent};--mint-2:${shade(brand.accent,.25)};--mint-3:${shade(brand.accent,.5)};
  --lime:${brand.accent2};--acc-2:${brand.accent2};
  --ink:${brand.ink};--ink-2:${ink2};--ink-3:${ink3};--paper:${brand.paper};--paper-2:${paper2};
@@ -382,7 +385,20 @@ function updateContrast(){const el=$('contrastWarn');if(!el)return;const ct=cont
 /* ===== export ===== */
 function download(name,html){const b=new Blob([html],{type:'text/html'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
 function slug(s){return (s||'deck').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
-function setTheme(th){deck.theme=th;[...$('themeSel').children].forEach(b=>b.classList.toggle('on',(b.dataset.th||'')===th));renderPreview();save();commit();}
+// paleta base de cada tema: al elegir un tema se vuelca en la marca (que es la fuente de
+// verdad y siempre gana en el render). Así el botón de tema cambia colores visibles y, a la
+// vez, los selectores de marca pueden ajustarlos después.
+const THEME_PALETTES={
+  '':{accent:'#9ED9C4',accent2:'#D7FF63',ink:'#0B1F22',paper:'#F7F4EC',font:'grotesk'},
+  editorial:{accent:'#c8f04a',accent2:'#86a52e',ink:'#0c0d11',paper:'#ece6da',font:'fraunces'}
+};
+function setTheme(th){
+  deck.theme=th;
+  const p=THEME_PALETTES[th];
+  if(p)brand=Object.assign(brand,{accent:p.accent,accent2:p.accent2,ink:p.ink,paper:p.paper,font:p.font});
+  [...$('themeSel').children].forEach(b=>b.classList.toggle('on',(b.dataset.th||'')===th));
+  renderBrandPanel();renderPreview();save();commit();
+}
 
 /* ===== eventos ===== */
 $('btnUndo').onclick=undo;$('btnRedo').onclick=redo;
