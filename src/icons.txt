@@ -1,0 +1,1 @@
+i-check,i-arrow-r,i-bolt,i-shield,i-gear,i-chart,i-people,i-doc,i-chip,i-target,i-clock,i-euro,i-rocket,i-warn,i-search,i-graph,i-lock,i-mail,i-cloud,i-db,i-code,i-brush,i-mic,i-eye,i-layers,i-flag,i-star,i-trophy,i-bulb,i-globe,i-puzzle,i-compass,i-handshake

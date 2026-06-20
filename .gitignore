@@ -1,0 +1,12 @@
+# Dependencias
+node_modules/
+
+# Artefactos de test (Playwright)
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# Sistema
+.DS_Store
+*.log
